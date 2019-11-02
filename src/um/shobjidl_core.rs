@@ -4,15 +4,68 @@
 // All files in the project carrying such notice may not be copied, modified, or distributed
 // except according to those terms.
 use ctypes::{c_int, c_void};
+use shared::basetsd::UINT_PTR;
 use shared::guiddef::{REFGUID, REFIID};
 use shared::minwindef::{BOOL, DWORD, UINT, ULONG, WORD};
-use shared::windef::{COLORREF, HICON, HWND, RECT};
+use shared::windef::{COLORREF, HICON, HMENU, HWND, POINT, RECT};
 use um::commctrl::HIMAGELIST;
 use um::objidl::IBindCtx;
 use um::propkeydef::REFPROPERTYKEY;
 use um::propsys::GETPROPERTYSTOREFLAGS;
 use um::unknwnbase::{IUnknown, IUnknownVtbl};
-use um::winnt::{HRESULT, LPCWSTR, LPWSTR, ULONGLONG, WCHAR};
+use um::winnt::{CHAR, HANDLE, HRESULT, LPCSTR, LPCWSTR, LPWSTR, ULONGLONG, WCHAR};
+STRUCT!{#[repr(packed(8))] struct CMINVOKECOMMANDINFO {
+    cbSize: DWORD,
+    fMask: DWORD,
+    hwnd: HWND,
+    lpVerb: LPCSTR,
+    lpParameters: LPCSTR,
+    lpDirectory: LPCSTR,
+    nShow: c_int,
+    dwHotKey: DWORD,
+    hIcon: HANDLE,
+}}
+pub type LPCMINVOKECOMMANDINFO = *mut CMINVOKECOMMANDINFO;
+pub type PCCMINVOKECOMMANDINFO = *const CMINVOKECOMMANDINFO;
+STRUCT!{#[repr(packed(8))] struct CMINVOKECOMMANDINFOEX {
+    cbSize: DWORD,
+    fMask: DWORD,
+    hwnd: HWND,
+    lpVerb: LPCSTR,
+    lpParameters: LPCSTR,
+    lpDirectory: LPCSTR,
+    nShow: c_int,
+    dwHotKey: DWORD,
+    hIcon: HANDLE,
+    lpTitle: LPCSTR,
+    lpVerbW: LPCWSTR,
+    lpParametersW: LPCWSTR,
+    lpDirectoryW: LPCWSTR,
+    lpTitleW: LPCWSTR,
+    ptInvoke: POINT,
+}}
+pub type LPCMINVOKECOMMANDINFOEX = *mut CMINVOKECOMMANDINFOEX;
+pub type PCCMINVOKECOMMANDINFOEX = *const CMINVOKECOMMANDINFOEX;
+RIDL!{#[uuid(0x000214e4, 0x0000, 0x0000, 0xc0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x46)]
+interface IContextMenu(IContextMenuVtbl): IUnknown(IUnknownVtbl) {
+    fn QueryContextMenu(
+        hmenu: HMENU,
+        indexMenu: UINT,
+        idCmdFirst: UINT,
+        idCmdLast: UINT,
+        uFlags: UINT,
+    ) -> HRESULT,
+    fn InvokeCommand(
+        pici: *mut CMINVOKECOMMANDINFO,
+    ) -> HRESULT,
+    fn GetCommandString(
+        idCmd: UINT_PTR,
+        uType: UINT,
+        pReserved: *mut UINT,
+        pszName: *mut CHAR,
+        cchMax: UINT,
+    ) -> HRESULT,
+}}
 DEFINE_GUID!{CLSID_DesktopWallpaper,
     0xc2cf3110, 0x460e, 0x4fc1, 0xb9, 0xd0, 0x8a, 0x1c, 0x0c, 0x9c, 0xc4, 0xbd}
 DEFINE_GUID!{CLSID_TaskbarList,
