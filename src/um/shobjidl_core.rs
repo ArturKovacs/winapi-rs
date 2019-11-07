@@ -19,11 +19,12 @@ use um::shellapi::{
     SEE_MASK_NOASYNC, SEE_MASK_NOZONECHECKS, SEE_MASK_NO_CONSOLE, SEE_MASK_UNICODE
 };
 use um::shtypes::{
-    PCUIDLIST_RELATIVE, PCUITEMID_CHILD, PCUITEMID_CHILD_ARRAY, PIDLIST_RELATIVE, PITEMID_CHILD,
-    SHCOLSTATEF, SHCOLUMNID, SHELLDETAILS, STRRET
+    PCIDLIST_ABSOLUTE, PCUIDLIST_RELATIVE, PCUITEMID_CHILD, PCUITEMID_CHILD_ARRAY,
+    PIDLIST_ABSOLUTE, PIDLIST_RELATIVE, PITEMID_CHILD, REFKNOWNFOLDERID, SHCOLSTATEF, SHCOLUMNID,
+    SHELLDETAILS, STRRET,
 };
 use um::unknwnbase::{IUnknown, IUnknownVtbl, LPUNKNOWN};
-use um::winnt::{CHAR, HANDLE, HRESULT, LPCSTR, LPCWSTR, LPWSTR, ULONGLONG, WCHAR};
+use um::winnt::{CHAR, HANDLE, HRESULT, LPCSTR, LPCWSTR, LPWSTR, PCWSTR, PWSTR, ULONGLONG, WCHAR};
 pub const CMF_NORMAL: UINT = 0x00000000;
 pub const CMF_DEFAULTONLY: UINT = 0x00000001;
 pub const CMF_VERBSONLY: UINT = 0x00000002;
@@ -368,6 +369,67 @@ interface IShellItem(IShellItemVtbl): IUnknown(IUnknownVtbl) {
         piOrder: *mut c_int,
     ) -> HRESULT,
 }}
+extern "system" {
+    pub fn SHCreateItemFromIDList(
+        pidl: PCIDLIST_ABSOLUTE,
+        riid: REFIID,
+        ppv: *mut *mut c_void,
+    ) -> HRESULT;
+    pub fn SHCreateItemFromParsingName(
+        pszPath: PCWSTR,
+        pbc: *mut IBindCtx,
+        riid: REFIID,
+        ppv: *mut *mut c_void,
+    ) -> HRESULT;
+    pub fn SHCreateItemWithParent(
+        pidlParent: PCIDLIST_ABSOLUTE,
+        psfParent: *mut IShellFolder,
+        pidl: PCUITEMID_CHILD,
+        riid: REFIID,
+        ppv: *mut *mut c_void,
+    ) -> HRESULT;
+    pub fn SHCreateItemFromRelativeName(
+        psiParent: *mut IShellItem,
+        pszName: PCWSTR,
+        pbc: *mut IBindCtx,
+        riid: REFIID,
+        ppv: *mut *mut c_void,
+    ) -> HRESULT;
+    pub fn SHCreateItemInKnownFolder(
+        kfid: REFKNOWNFOLDERID,
+        dwKFFlags: DWORD,
+        pszItem: PCWSTR,
+        riid: REFIID,
+        ppv: *mut *mut c_void,
+    ) -> HRESULT;
+    pub fn SHGetIDListFromObject(
+        punk: *mut IUnknown,
+        ppidl: *mut PIDLIST_ABSOLUTE,
+    ) -> HRESULT;
+    pub fn SHGetItemFromObject(
+        punk: *mut IUnknown,
+        riid: REFIID,
+        ppv: *mut *mut c_void,
+    ) -> HRESULT;
+    pub fn SHGetPropertyStoreFromIDList(
+        pidl: PCIDLIST_ABSOLUTE,
+        flags: GETPROPERTYSTOREFLAGS,
+        riid: REFIID,
+        ppv: *mut *mut c_void,
+    ) -> HRESULT;
+    pub fn SHGetPropertyStoreFromParsingName(
+        pszPath: PCWSTR,
+        pbc: *mut IBindCtx,
+        flags: GETPROPERTYSTOREFLAGS,
+        riid: REFIID,
+        ppv: *mut *mut c_void,
+    ) -> HRESULT;
+    pub fn SHGetNameFromIDList(
+        pidl: PCIDLIST_ABSOLUTE,
+        sigdnName: SIGDN,
+        ppszName: *mut PWSTR,
+    ) -> HRESULT;
+}
 ENUM!{enum SIATTRIBFLAGS {
     SIATTRIBFLAGS_AND = 0x1,
     SIATTRIBFLAGS_OR = 0x2,
